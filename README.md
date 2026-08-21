@@ -1,2 +1,2 @@
 # SockJest-Frontend
-Repositorio dedicado ala creación de backend Sockjest.
+Repositorio dedicado ala creación de frontend Sockjest.
