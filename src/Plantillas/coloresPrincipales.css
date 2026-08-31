@@ -1,0 +1,20 @@
+.testimonial {
+  background-color: var(--dark-bg);
+  color: var(--text-light);
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.testimonial p {
+  font-family: var(--serif-font);
+  font-style: italic;
+  font-size: 1.4rem;
+  max-width: 600px;
+  margin: 0 auto 20px auto;
+  line-height: 1.6;
+}
+
+.testimonial span {
+  font-size: 13px;
+  letter-spacing: 1px;
+}
