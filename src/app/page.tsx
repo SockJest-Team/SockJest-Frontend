@@ -1,13 +1,4 @@
-"use client";
-import HomeView from "@/features/home/HomeView";
-import { useAuthStore } from "@/store/authStore";
-
-export default function Home() {
-  const { isLoggedIn, logoutStore } = useAuthStore();
-
-  return (
-    <main>
-      <HomeView />
-    </main>
-  );
+import { SubastasView } from "@/features/subastas/components/SubastasView";
+export default function HomePage() {
+  return <SubastasView />;
 }

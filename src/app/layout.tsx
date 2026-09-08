@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import NavBar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import "./globals.css";
-import Providers from "./providers";
-import AuthSyncWrapper from "@/components/layout/AuthSyncWrapper";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { SincronizadorPerfil } from "@/components/providers/SincronizadorPerfil";
+import { NotificacionesPush } from "@/components/providers/NotificacionesPush";
 
 export const metadata: Metadata = {
-  title: "Live",
-  description: "App de subastas",
+  title: "LiveBid Studio",
+  description: "Plataforma de subastas en tiempo real",
 };
 
 export default function RootLayout({
@@ -17,20 +18,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>
-        <Providers>
-          {/* 1. El wrapper verifica el token con el backend al cargar la web */}
-          <AuthSyncWrapper>
-            {/* 2. El Navbar lee Zustand y cambia los botones según si está logueado o no */}
-            <NavBar />
-
-            {/* 3. Aquí se inyecta tu HomeView, SubastasView, etc. */}
-            <main>{children}</main>
-
-            {/* 4. Footer global */}
-            <Footer />
-          </AuthSyncWrapper>
-        </Providers>
+      <body className="bg-white text-slate-800 antialiased">
+        <QueryProvider>
+          <SincronizadorPerfil />
+          <NotificacionesPush />
+          <Navbar />
+          <main className="min-h-[70vh]">{children}</main>
+          <Footer />
+        </QueryProvider>
       </body>
     </html>
   );

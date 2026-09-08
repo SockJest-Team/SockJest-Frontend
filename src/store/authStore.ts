@@ -1,33 +1,53 @@
 import { create } from "zustand";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
+import { persist } from "zustand/middleware";
+import type { DatosUsuario } from "@/api/services/authService";
 
 interface AuthState {
-  isLoggedIn: boolean;
-  user: User | null;
-  loginStore: (token: string, user: User) => void;
-  setUser: (user: User) => void;
-  logoutStore: () => void;
+  accessToken: string | null;
+  refreshToken: string | null;
+  user: DatosUsuario | null;
+
+  login: (
+    user: DatosUsuario,
+    accessToken: string,
+    refreshToken?: string,
+  ) => void;
+  logout: () => void;
+  actualizarTokens: (accessToken: string, refreshToken: string) => void;
+  sincronizarUser: (user: DatosUsuario) => void;
+  tieneAlgunRol: (...roles: string[]) => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  isLoggedIn: typeof window !== "undefined" && !!localStorage.getItem("token"),
-  user: null,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
 
-  loginStore: (token, user) => {
-    localStorage.setItem("token", token);
-    set({ isLoggedIn: true, user });
-  },
+      login: (user, accessToken, refreshToken) =>
+        set({ user, accessToken, refreshToken }),
 
-  setUser: (user) => set({ user, isLoggedIn: true }),
+      logout: () => set({ user: null, accessToken: null, refreshToken: null }),
 
-  logoutStore: () => {
-    localStorage.removeItem("token");
-    set({ isLoggedIn: false, user: null });
-  },
-}));
+      actualizarTokens: (accessToken, refreshToken) =>
+        set({ accessToken, refreshToken }),
+
+      sincronizarUser: (user) => set({ user }),
+
+      tieneAlgunRol: (...rolesBuscados) => {
+        const rolesUsuario = get().user?.roles;
+        if (!rolesUsuario) return false;
+        return rolesBuscados.some((r) => rolesUsuario.includes(r));
+      },
+    }),
+    {
+      name: "live-auction-auth",
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        user: state.user,
+      }),
+    },
+  ),
+);
