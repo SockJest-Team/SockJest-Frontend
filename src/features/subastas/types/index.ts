@@ -29,6 +29,9 @@ export interface SubastaResumen {
   fechaFin: string;
   idCategoria2?: { idCategoria: string; nombre: string } | null;
   imagenes?: ImagenSubasta[];
+  descripcion?: string | null;
+  incrementoMinimoPct?: string;
+  idSubastador?: { idUsuario: string; nombreCompleto: string } | null;
 }
 
 export interface SubastaDetalle {

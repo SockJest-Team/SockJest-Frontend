@@ -68,7 +68,21 @@ export function CrearSubastaView() {
     },
   });
 
-  const valores = useWatch({ control });
+  const valoresWatch = useWatch({ control });
+
+  const valores = {
+    titulo: valoresWatch.titulo ?? "",
+    politicaEnvio: valoresWatch.politicaEnvio ?? "",
+    precioBase: Number(valoresWatch.precioBase ?? 0) || 0,
+    incrementoMinimoPct: Number(valoresWatch.incrementoMinimoPct ?? 0) || 0,
+    idCategoria: valoresWatch.idCategoria ?? "",
+    fechaInicio: valoresWatch.fechaInicio ?? "",
+    fechaFin: valoresWatch.fechaFin ?? "",
+    limiteUsuariosConcurrentes:
+      Number(valoresWatch.limiteUsuariosConcurrentes ?? 2) || 2,
+    esPrivada: valoresWatch.esPrivada ?? false,
+    requiereReserva: valoresWatch.requiereReserva ?? false,
+  };
 
   async function avanzar() {
     if (paso === 0) {
