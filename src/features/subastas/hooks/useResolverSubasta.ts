@@ -15,4 +15,4 @@ export function useResolverSubasta() {
       void queryClient.invalidateQueries({ queryKey: ["subastas"] });
     },
   });
-}
+} 

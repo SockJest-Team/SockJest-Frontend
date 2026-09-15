@@ -14,6 +14,7 @@ import {
 import { refrescarSesion } from "@/utils/helpers/session-refresh";
 import { formatearMoneda } from "@/utils/formatters";
 import type { PujaEnVivo } from "../types";
+import { getUrlWs } from "@/api/config/api-failover";
 
 interface EstadoWS {
   conectado: boolean;
@@ -109,7 +110,7 @@ export function useSubastaEnVivo(idSubasta: string) {
 
     let reintentado = false;
 
-    const socket: Socket = io(`${process.env.NEXT_PUBLIC_WS_URL}/auctions`, {
+    const socket: Socket = io(`${getUrlWs()}/auctions`, {
       auth: { token },
       transports: ["websocket"],
       reconnectionDelay: 2_000,
