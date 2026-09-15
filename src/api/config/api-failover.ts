@@ -2,7 +2,7 @@ const PRINCIPAL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
 const RESPALDO = process.env.NEXT_PUBLIC_API_URL_BACKUP ?? PRINCIPAL;
 
-const WS_PRINCIPAL = process.env.NEXT_PUBLIC_WS_URL == "http://localhost:4000";
+const WS_PRINCIPAL = process.env.NEXT_PUBLIC_WS_URL ?? "http://localhost:4000";
 const WS_RESPALDO = process.env.NEXT_PUBLIC_WS_URL_BACKUP ?? WS_PRINCIPAL;
 
 const RUTA_HEALTH = "/subastas?limit=1";
