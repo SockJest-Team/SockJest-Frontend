@@ -1,13 +1,15 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { traducirError } from "@/utils/helpers/error-messages";
+import { getUrlApi, failoverPorError } from "./api-failover";
 
 export const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api",
+  baseURL: getUrlApi(),
   timeout: 20_000,
 });
 
 axiosClient.interceptors.request.use((config) => {
+  config.baseURL = getUrlApi();
   const token = useAuthStore.getState().accessToken;
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -26,6 +28,23 @@ axiosClient.interceptors.response.use(
       traducirError(error);
 
     const esRutaAuth = original?.url?.includes("/auth/");
+
+    const esCaídaDeRed =
+      !error.response &&
+      original &&
+      !original._reintentado &&
+      !esRutaAuth &&
+      typeof window !== "undefined";
+
+    if (esCaídaDeRed) {
+      original._reintentado = true;
+      const conmutó = await failoverPorError();
+      if (conmutó) {
+        original.baseURL = getUrlApi();
+        return axiosClient(original);
+      }
+    }
+
     if (
       error.response?.status === 401 &&
       original &&
@@ -38,10 +57,9 @@ axiosClient.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const { data } = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api"}/auth/refresh`,
-            { refresh_token: refreshToken },
-          );
+          const { data } = await axios.post(`${getUrlApi()}/auth/refresh`, {
+            refresh_token: refreshToken,
+          });
           useAuthStore
             .getState()
             .actualizarTokens(data.access_token, data.refresh_token);
