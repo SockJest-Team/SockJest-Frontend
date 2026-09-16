@@ -1,27 +1,31 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { axiosClient as apiClient } from "@/api/config/axiosClient";
 import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { obtenerMensajeError } from "@/utils/helpers/error-messages";
 import { authService } from "@/api/services/authService";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 function AuthForm() {
   const searchParams = useSearchParams();
   const mode = searchParams.get("mode");
-  const [isLogin, setIsLogin] = useState(mode !== "register");
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setIsLogin(mode !== "register");
-  }, [mode]);
+  const isLogin = mode !== "register";
+
+  const toggleMode = () => {
+    const nuevoEstado = !isLogin;
+    router.replace(`/auth?mode=${nuevoEstado ? "login" : "register"}`, {
+      scroll: false,
+    });
+  };
 
   const [form, setForm] = useState({
     email: "",
@@ -44,8 +48,6 @@ function AuthForm() {
     },
     { id: "Usuario", label: "Híbrido", desc: "Acceso total a ambos perfiles" },
   ];
-
-  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +76,7 @@ function AuthForm() {
           rol: form.rol,
         });
         toast.success("Cuenta creada. Inicia sesión.");
-        setIsLogin(true);
+        router.replace("/auth?mode=login", { scroll: false });
       }
       router.push("/");
     } catch (err) {
@@ -82,14 +84,6 @@ function AuthForm() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleMode = () => {
-    const nuevoEstado = !isLogin;
-    setIsLogin(nuevoEstado);
-    router.replace(`/auth?mode=${nuevoEstado ? "login" : "register"}`, {
-      scroll: false,
-    });
   };
 
   return (
