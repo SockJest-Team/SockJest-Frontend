@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { CampanaNotificaciones } from "@/components/layout/CampanaNotificaciones";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 const ACTIVO = "text-stone-900 border-b border-stone-900 pb-0.5";
 const INACTIVO = "text-stone-500 hover:text-stone-900 transition-colors";
@@ -69,9 +70,12 @@ export function Navbar() {
   const activo = (l: { href: string; prefijo: boolean }) =>
     l.prefijo ? pathname.startsWith(l.href) : pathname === l.href;
 
+  const queryClient = useQueryClient();
+
   function salir() {
     cerrar();
     logout();
+    queryClient.clear();
     router.push("/");
   }
 
