@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { obtenerMensajeError } from "@/utils/helpers/error-messages";
 import { authService } from "@/api/services/authService";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 function AuthForm() {
   const searchParams = useSearchParams();
@@ -44,12 +45,15 @@ function AuthForm() {
     { id: "Usuario", label: "Híbrido", desc: "Acceso total a ambos perfiles" },
   ];
 
+  const queryClient = useQueryClient();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (isLogin) {
         const data = await authService.login(form.email, form.password);
+        queryClient.clear();
         login(
           {
             id: data.userId,
