@@ -9,7 +9,6 @@ const RUTA_HEALTH = "/subastas?limit=1";
 const TIMEOUT_HEALTH = 4_000;
 
 type Modo = "principal" | "respaldo";
-
 let modo: Modo =
   typeof window !== "undefined" &&
   window.localStorage.getItem("livebid-api-modo") === "respaldo"
@@ -45,7 +44,9 @@ async function ping(urlBase: string): Promise<boolean> {
       signal: AbortSignal.timeout(TIMEOUT_HEALTH),
       cache: "no-store",
     });
-    return res.ok;
+    if (!res.ok) return false;
+    const contentType = res.headers.get("content-type") ?? "";
+    return contentType.includes("application/json");
   } catch {
     return false;
   }
