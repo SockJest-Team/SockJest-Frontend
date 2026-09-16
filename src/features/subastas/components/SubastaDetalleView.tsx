@@ -97,6 +97,8 @@ export function SubastaDetalleView() {
 
   const s: SubastaDetalle = data.subasta!;
   const isUpcoming = new Date(s.fechaInicio) > new Date();
+  const isTransitioning =
+    !isUpcoming && s.estado !== "Finalizada" && s.estado !== "Rechazada";
   const isActive = s.estado === "Activa" && !isUpcoming;
   const esVendedor = Boolean(user?.id && user.id === s.subastador.id);
 
@@ -166,20 +168,17 @@ export function SubastaDetalleView() {
 
             <div className="flex flex-col items-stretch gap-2 w-full sm:w-auto">
               {isActive ? (
-                <Link
-                  href={`/subastas/${s.idSubasta}/en-vivo`}
-                  className="text-center px-8 py-3.5 bg-stone-900 hover:bg-stone-800 text-white font-mono text-[11px] uppercase tracking-widest transition-colors"
-                >
+                <Link href={`/subastas/${s.idSubasta}/en-vivo`} /* ... */>
                   Entrar a la Sala
                 </Link>
               ) : isUpcoming ? (
-                <span className="text-center px-6 py-3 bg-stone-200 text-stone-600 font-mono text-[10px] uppercase tracking-widest">
-                  Esperando inicio…
+                <span>Esperando inicio…</span>
+              ) : isTransitioning ? (
+                <span className="text-center px-6 py-3 bg-blue-100 text-blue-700 font-mono text-[10px] uppercase tracking-widest border border-blue-200">
+                  ⏳ Activando…
                 </span>
               ) : (
-                <span className="text-center px-6 py-3 bg-stone-100 text-stone-500 font-mono text-[10px] uppercase tracking-widest border border-stone-200">
-                  Subasta finalizada
-                </span>
+                <span>Subasta finalizada</span>
               )}
 
               {user && !esVendedor && s.estado !== "Finalizada" && (
