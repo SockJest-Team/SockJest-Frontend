@@ -14,7 +14,11 @@ import {
 import { refrescarSesion } from "@/utils/helpers/session-refresh";
 import { formatearMoneda } from "@/utils/formatters";
 import type { PujaEnVivo } from "../types";
-import { getUrlWs } from "@/api/config/api-failover";
+import {
+  failoverPorError,
+  getUrlWs,
+  suscribirModo,
+} from "@/api/config/api-failover";
 
 interface EstadoWS {
   conectado: boolean;
@@ -218,7 +222,16 @@ export function useSubastaEnVivo(idSubasta: string) {
       }
     });
 
+    const desuscribir = suscribirModo((modo) => {
+      if (modo === "respaldo") {
+        socket.removeAllListeners();
+        socket.disconnect();
+        desuscribir();
+      }
+    });
+
     return () => {
+      desuscribir();
       socket.removeAllListeners();
       socket.io.removeAllListeners();
       socket.disconnect();
@@ -231,6 +244,7 @@ export function useSubastaEnVivo(idSubasta: string) {
       new Promise<RespuestaPuja>((resolve) => {
         const socket = socketRef.current;
         if (!socket || !socket.connected) {
+          void failoverPorError();
           resolve({
             ok: false,
             message:

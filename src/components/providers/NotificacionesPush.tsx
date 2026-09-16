@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
+import { getUrlWs, suscribirModo } from "@/api/config/api-failover";
 
 interface EventoPush {
   tipo:
@@ -35,7 +36,7 @@ export function NotificacionesPush() {
 
     let reintentado = false;
 
-    const socket = io(`${process.env.NEXT_PUBLIC_WS_URL}/notifications`, {
+    const socket = io(`${getUrlWs()}/notifications`, {
       auth: { token: accessToken },
       transports: ["websocket"],
     });
@@ -130,7 +131,16 @@ export function NotificacionesPush() {
       }
     });
 
+    const desuscribir = suscribirModo((modo) => {
+      if (modo === "respaldo") {
+        socket.removeAllListeners();
+        socket.disconnect();
+        desuscribir();
+      }
+    });
+
     return () => {
+      desuscribir();
       socket.removeAllListeners();
       socket.disconnect();
     };
