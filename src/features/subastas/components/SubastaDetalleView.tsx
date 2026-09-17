@@ -8,6 +8,7 @@ import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
 import { ImagenConFallback } from "@/components/ui/ImagenConFallback";
+import { GaleriaImagenes } from "@/components/ui/GaleriaImagenes";
 import { Countdown } from "@/components/ui/Countdown";
 import { Estrellas } from "@/components/ui/Estrellas";
 import { useSubastaDetalle } from "../hooks/useSubastaDetalle";
@@ -97,7 +98,9 @@ export function SubastaDetalleView() {
 
   const s: SubastaDetalle = data.subasta!;
   const isUpcoming = new Date(s.fechaInicio) > new Date();
-  const isActive = s.estado === "Activa" && !isUpcoming;
+  const isTransitioning =
+    !isUpcoming && s.estado !== "Finalizada" && s.estado !== "Rechazada";
+  const isActive = s.estado === "Activa";
   const esVendedor = Boolean(user?.id && user.id === s.subastador.id);
 
   return (
@@ -121,16 +124,7 @@ export function SubastaDetalleView() {
               className="w-full h-72 object-cover bg-stone-100"
             />
             {s.imagenes.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                {s.imagenes.map((img) => (
-                  <ImagenConFallback
-                    key={img.idImagen}
-                    src={img.url}
-                    alt={s.titulo}
-                    className="h-16 w-24 shrink-0 object-cover border border-stone-200 cursor-pointer hover:border-stone-900 transition-colors"
-                  />
-                ))}
-              </div>
+              <GaleriaImagenes imagenes={s.imagenes} alt={s.titulo} />
             )}
           </div>
 
@@ -158,6 +152,8 @@ export function SubastaDetalleView() {
                   </>
                 ) : isUpcoming ? (
                   <>Inicia {formatearFechaHora(s.fechaInicio)}</>
+                ) : isTransitioning ? (
+                  <>Sincronizando estado…</>
                 ) : (
                   formatearFechaHora(s.fechaFin)
                 )}
@@ -175,6 +171,10 @@ export function SubastaDetalleView() {
               ) : isUpcoming ? (
                 <span className="text-center px-6 py-3 bg-stone-200 text-stone-600 font-mono text-[10px] uppercase tracking-widest">
                   Esperando inicio…
+                </span>
+              ) : isTransitioning ? (
+                <span className="text-center px-6 py-3 bg-blue-100 text-blue-700 font-mono text-[10px] uppercase tracking-widest border border-blue-200">
+                  ⏳ Activando…
                 </span>
               ) : (
                 <span className="text-center px-6 py-3 bg-stone-100 text-stone-500 font-mono text-[10px] uppercase tracking-widest border border-stone-200">
@@ -253,7 +253,6 @@ export function SubastaDetalleView() {
                   Subastador
                 </dt>
                 <dd className="flex items-center gap-2 min-w-0">
-                  {/*  Nombre → link al perfil del vendedor */}
                   {s.subastador.id ? (
                     <Link
                       href={`/vendedores/${s.subastador.id}`}
