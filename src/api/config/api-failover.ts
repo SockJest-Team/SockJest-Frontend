@@ -54,14 +54,15 @@ async function ping(urlBase: string): Promise<boolean> {
 
 export async function verificarApiAlArrancar(): Promise<void> {
   if (modo === "principal") {
-    const azureTest = await ping(RESPALDO);
-    if (!azureTest) {
-      const renderTest = await ping(RESPALDO);
-      if (renderTest) cambio("respaldo");
+    const azureVive = await ping(PRINCIPAL);
+    if (!azureVive) {
+      await new Promise((r) => setTimeout(r, 3_000));
+      const azureVive2 = await ping(PRINCIPAL);
+      if (!azureVive2) {
+        const renderVive = await ping(RESPALDO);
+        if (renderVive) cambio("respaldo");
+      }
     }
-  } else {
-    const azureTest = await ping(PRINCIPAL);
-    if (azureTest) cambio("principal");
   }
 }
 
@@ -72,10 +73,16 @@ function cambio(nuevo: Modo) {
   notificar();
 }
 
+let ultimoFailover = 0;
+const COOLDOWN_FAILOVER_MS = 30_000;
+
 export async function failoverPorError(): Promise<boolean> {
   if (modo === "principal") {
-    const renderTest = await ping(RESPALDO);
-    if (renderTest) {
+    if (Date.now() - ultimoFailover < COOLDOWN_FAILOVER_MS) return false;
+
+    const renderVive = await ping(RESPALDO);
+    if (renderVive) {
+      ultimoFailover = Date.now();
       cambio("respaldo");
       return true;
     }
