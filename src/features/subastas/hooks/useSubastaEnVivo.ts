@@ -114,7 +114,7 @@ export function useSubastaEnVivo(idSubasta: string) {
 
     let reintentado = false;
 
-    const socket: Socket = io(`${getUrlWs()}/auctions`, {
+    const socket: Socket = io(`${getUrlWs()}auctions`, {
       auth: { token },
       transports: ["websocket"],
       reconnectionDelay: 2_000,
