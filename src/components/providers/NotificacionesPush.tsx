@@ -36,7 +36,7 @@ export function NotificacionesPush() {
 
     let reintentado = false;
 
-    const socket = io(`${getUrlWs()}/notifications`, {
+    const socket = io(`${getUrlWs()}notifications`, {
       auth: { token: accessToken },
       transports: ["websocket"],
     });
