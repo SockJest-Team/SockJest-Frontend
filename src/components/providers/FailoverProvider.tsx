@@ -24,7 +24,7 @@ export function FailoverProvider({ children }: { children: React.ReactNode }) {
                         rounded-full shadow-lg"
         >
           <p className="text-xs font-mono uppercase tracking-widest text-amber-700">
-            ⚠ Operando en servidor de respaldo
+            Rendimiento bajo
           </p>
         </div>
       )}

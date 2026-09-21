@@ -10,6 +10,9 @@ import { FailoverProvider } from "@/components/providers/FailoverProvider";
 export const metadata: Metadata = {
   title: "LiveBid Studio",
   description: "Plataforma de subastas en tiempo real",
+  verification: {
+    google: "JC27INaOYU7u3WWNV4fPdoAtYmbrgON620nNKOHKkng",
+  },
 };
 
 export default function RootLayout({
