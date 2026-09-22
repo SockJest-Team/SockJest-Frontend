@@ -31,7 +31,7 @@ function AuthForm() {
     email: "",
     password: "",
     name: "",
-    rol: "",
+    rol: "Comprador",
     phone: "",
   });
 
