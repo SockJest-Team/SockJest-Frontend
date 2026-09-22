@@ -15,35 +15,28 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v4 
-
-      - name: Set up Node.js version
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: '22.x'
-          cache: 'npm' 
+          submodules: true
+          lfs: false
 
-      - name: Install dependencies and build frontend
-        env:
-          NEXT_PUBLIC_API_URL: https://livebidapi-cwebcvfvh3d9f2hj.brazilsouth-01.azurewebsites.net/api
-          NEXT_PUBLIC_WS_URL: https://livebidapi-cwebcvfvh3d9f2hj.brazilsouth-01.azurewebsites.net/
-          NEXT_PUBLIC_API_URL_BACKUP: https://sockjest-backend.onrender.com/api
-          NEXT_PUBLIC_WS_URL_BACKUP: https://sockjest-backend.onrender.com/
-        run: |
-          npm ci
-          npm run build
-
-      - name: Deploy to Azure Static Web Apps
+      - name: Build And Deploy to Azure
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ZEALOUS_WATER_08ED40D10 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "./.next" 
-          output_location: ""    
-          skip_app_build: true  
-          api_location: ""
+          
+          app_location: "/"        
+          api_location: ""         
+          output_location: ""      
+          
+        env:
+          NEXT_PUBLIC_API_URL: https://livebidapi-cwebcvfvh3d9f2hj.brazilsouth-01.azurewebsites.net/api
+          NEXT_PUBLIC_WS_URL: https://livebidapi-cwebcvfvh3d9f2hj.brazilsouth-01.azurewebsites.net/
+          NEXT_PUBLIC_API_URL_BACKUP: https://sockjest-backend.onrender.com/api
+          NEXT_PUBLIC_WS_URL_BACKUP: https://sockjest-backend.onrender.com/
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -55,4 +48,4 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ZEALOUS_WATER_08ED40D10 }}
-          action: "close"
+          action: "close" # Cierra los entornos de sandbox de los Pull Requests
