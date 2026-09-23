@@ -8,6 +8,8 @@ export const axiosClient = axios.create({
   timeout: 20_000,
 });
 
+let redirigiendoALogin = false;
+
 axiosClient.interceptors.request.use((config) => {
   config.baseURL = getUrlApi();
   const token = useAuthStore.getState().accessToken;
@@ -28,6 +30,13 @@ axiosClient.interceptors.response.use(
       traducirError(error);
 
     const esRutaAuth = original?.url?.includes("/auth/");
+
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname.startsWith("/auth")
+    ) {
+      return Promise.reject(error);
+    }
 
     const esCaídaDeRed =
       !error.response &&
@@ -68,7 +77,10 @@ axiosClient.interceptors.response.use(
           return axiosClient(original);
         } catch {
           useAuthStore.getState().logout();
-          window.location.href = "/auth?mode=login";
+          if (!redirigiendoALogin) {
+            redirigiendoALogin = true;
+            window.location.href = "/auth?mode=login";
+          }
           return Promise.reject(error);
         }
       }
@@ -80,7 +92,10 @@ axiosClient.interceptors.response.use(
       typeof window !== "undefined"
     ) {
       useAuthStore.getState().logout();
-      window.location.href = "/auth?mode=login";
+      if (!redirigiendoALogin) {
+        redirigiendoALogin = true;
+        window.location.href = "/auth?mode=login";
+      }
     }
 
     return Promise.reject(error);
