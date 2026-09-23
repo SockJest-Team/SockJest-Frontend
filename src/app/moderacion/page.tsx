@@ -1,5 +1,5 @@
-import { ModeracionView } from "@/features/subastas/components/ModeracionView";
+import { redirect } from "next/navigation";
 
-export default function ModeracionPage() {
-  return <ModeracionView />;
+export default function ModeracionRedirect() {
+  redirect("/admin/moderacion");
 }

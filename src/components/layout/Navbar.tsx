@@ -72,8 +72,12 @@ export function Navbar() {
 
   const queryClient = useQueryClient();
 
-  function salir() {
+  async function salir() {
     cerrar();
+    try {
+      const { authService } = await import("@/api/services/authService");
+      await authService.logout();
+    } catch {}
     logout();
     queryClient.clear();
     router.push("/");
