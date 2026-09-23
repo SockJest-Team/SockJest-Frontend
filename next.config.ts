@@ -16,10 +16,10 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      "script-src 'self'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
-      "connect-src 'self' https://*.azurewebsites.net wss://*.azurewebsites.net https://*.onrender.com wss://*.onrender.com https://*.supabase.co",
+      "connect-src 'self' https://livebidapi-cwebcvfvh3d9f2hj.brazilsouth-01.azurewebsites.net wss://livebidapi-cwebcvfvh3d9f2hj.brazilsouth-01.azurewebsites.net https://sockjest-backend.onrender.com wss://sockjest-backend.onrender.com https://kshrbobyozqyydzzlfps.supabase.co",
       "font-src 'self' data:",
       "object-src 'none'",
       "base-uri 'self'",
