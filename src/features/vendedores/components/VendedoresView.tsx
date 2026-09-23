@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -10,7 +10,28 @@ import { Estrellas } from "@/components/ui/Estrellas";
 export function VendedoresView() {
   const [busqueda, setBusqueda] = useState("");
   const busquedaDebounced = useDebounce(busqueda, 400);
-  const { data: vendedores, isPending } = useVendedores(busquedaDebounced);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending } =
+    useVendedores(busquedaDebounced);
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  const vendedores = data?.pages.flatMap((p) => p.items) ?? [];
 
   return (
     <div className="min-h-screen bg-[#F9F8F6] text-stone-900 selection:bg-stone-900 selection:text-white">
@@ -44,7 +65,7 @@ export function VendedoresView() {
         )}
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vendedores?.map((v, i) => (
+          {vendedores.map((v, i) => (
             <motion.div
               key={v.id}
               initial={{ opacity: 0, y: 10 }}
@@ -79,10 +100,29 @@ export function VendedoresView() {
           ))}
         </div>
 
-        {!isPending && vendedores?.length === 0 && (
+        {/* Sentinel para infinite scroll */}
+        <div ref={sentinelRef} className="py-8">
+          {isFetchingNextPage && (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-32 bg-white border border-stone-200 animate-pulse"
+                />
+              ))}
+            </div>
+          )}
+          {!hasNextPage && vendedores.length > 0 && (
+            <p className="text-center text-xs text-stone-400 font-mono uppercase tracking-wider">
+              No hay más vendedores
+            </p>
+          )}
+        </div>
+
+        {!isPending && vendedores.length === 0 && (
           <div className="text-center py-24 border border-dashed border-stone-300">
             <p className="text-stone-600 font-serif text-lg">
-              No encontramos vendedores con "{busquedaDebounced}".
+              No encontramos vendedores con &quot;{busquedaDebounced}&quot;.
             </p>
           </div>
         )}

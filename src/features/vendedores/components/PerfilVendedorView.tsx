@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { motion } from "motion/react";
 import { usePerfilVendedor } from "../hooks/useVendedores";
 import { Estrellas } from "@/components/ui/Estrellas";
@@ -16,10 +15,25 @@ const ESTADO_SUBASTA: Record<string, string> = {
   Finalizada: "Finalizada",
 };
 
-export function PerfilVendedorView() {
-  const params = useParams<{ id: string }>();
-  const id = params.id as string;
-  const { data: v, isPending, isError } = usePerfilVendedor(id);
+interface SubastaPerfil {
+  idSubasta: string;
+  titulo: string;
+  estado: string;
+  precioBase: string;
+  fechaFin: string;
+  categoria: string | null;
+  imagen: string | null;
+}
+
+interface CalificacionPerfil {
+  puntuacion: number;
+  comentario: string | null;
+  fecha: string;
+  comprador: string;
+}
+
+export function PerfilVendedorView({ vendedorId }: { vendedorId: string }) {
+  const { data: v, isPending, isError } = usePerfilVendedor(vendedorId);
 
   if (isPending) {
     return (
@@ -88,7 +102,7 @@ export function PerfilVendedorView() {
             </p>
           )}
           <div className="grid sm:grid-cols-2 gap-6">
-            {v.subastas.map((s) => {
+            {v.subastas.map((s: SubastaPerfil) => {
               const estado = (ESTADO_SUBASTA[s.estado] ?? s.estado) as never;
               return (
                 <Link
@@ -105,6 +119,12 @@ export function PerfilVendedorView() {
                     <div className="absolute top-2 left-2">
                       <EstadoBadge estado={estado} />
                     </div>
+                    {/* Badge de "En vivo" */}
+                    {s.estado === "Activa" && (
+                      <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded-full">
+                        En vivo
+                      </div>
+                    )}
                   </div>
                   <div className="p-4 space-y-2">
                     <h3 className="font-serif text-lg text-stone-900 line-clamp-1">
@@ -141,7 +161,7 @@ export function PerfilVendedorView() {
               Sin calificaciones aún.
             </p>
           )}
-          {v.calificaciones.map((c, i) => (
+          {v.calificaciones.map((c: CalificacionPerfil, i: number) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 8 }}
@@ -157,7 +177,7 @@ export function PerfilVendedorView() {
               </div>
               {c.comentario && (
                 <p className="text-sm text-stone-600 font-light leading-relaxed">
-                  “{c.comentario}”
+                  &ldquo;{c.comentario}&rdquo;
                 </p>
               )}
               <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 block">

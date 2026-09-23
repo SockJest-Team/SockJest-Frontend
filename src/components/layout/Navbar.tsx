@@ -107,7 +107,7 @@ export function Navbar() {
 
           {accessToken ? (
             <div className="hidden md:flex items-center gap-4">
-              <span className="text-xs font-mono uppercase tracking-wider text-stone-600 hidden lg:inline truncate max-w-[160px]">
+              <span className="text-xs font-mono uppercase tracking-wider text-stone-600 hidden lg:inline truncate max-w-40">
                 {user?.nombre || user?.email || "Sesión Activa"}
               </span>
               <button
