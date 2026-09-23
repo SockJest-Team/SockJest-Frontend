@@ -1,4 +1,5 @@
-import { ModeracionView } from "@/features/subastas/components/ModeracionView";
-export default function AdminModeracionPage() {
-  return <ModeracionView />;
+import { ModeracionPanel } from "@/features/subastas/components/ModeracionPanel";
+
+export default function ModeracionPage() {
+  return <ModeracionPanel />;
 }
