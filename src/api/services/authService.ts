@@ -13,6 +13,13 @@ export interface RespuestaLogin {
   refresh_token: string;
 }
 
+export interface PayloadRegistro {
+  nombre_completo: string;
+  correo: string;
+  contraseña: string;
+  telefono: string;
+}
+
 export const authService = {
   login: async (
     correo: string,
@@ -25,13 +32,8 @@ export const authService = {
     return data;
   },
 
-  register: async (payload: {
-    nombre_completo: string;
-    correo: string;
-    contraseña: string;
-    telefono: string;
-    rol: string;
-  }) => {
+  // 🔒 FIX FE-CRIT-02: payload sin `rol`
+  register: async (payload: PayloadRegistro) => {
     const { data } = await axiosClient.post("/auth/register", payload);
     return data;
   },
@@ -39,5 +41,9 @@ export const authService = {
   me: async (): Promise<{ user: DatosUsuario }> => {
     const { data } = await axiosClient.get<{ user: DatosUsuario }>("/auth/me");
     return data;
+  },
+
+  logout: async (): Promise<void> => {
+    await axiosClient.post("/auth/logout");
   },
 };

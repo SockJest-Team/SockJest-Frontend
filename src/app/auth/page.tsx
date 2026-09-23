@@ -61,7 +61,7 @@ function AuthForm() {
             id: data.userId,
             nombre: form.name,
             email: form.email,
-            roles: [form.rol],
+            roles: [],
           },
           data.access_token,
           data.refresh_token,
@@ -73,7 +73,6 @@ function AuthForm() {
           correo: form.email,
           contraseña: form.password,
           telefono: form.phone,
-          rol: form.rol,
         });
         toast.success("Cuenta creada. Inicia sesión.");
         router.replace("/auth?mode=login", { scroll: false });
