@@ -6,8 +6,6 @@ import {
   Bell,
   Check,
   CheckCheck,
-  Gavel,
-  Package,
   DollarSign,
   Lock,
   Clock,
@@ -139,7 +137,6 @@ export function CampanaNotificaciones() {
   const items = bandeja?.items ?? [];
   const noLeidas = bandeja?.noLeidas ?? 0;
 
-  // Contar no leídas por tipo
   const conteoPorTipo = useMemo(() => {
     const conteo: Record<string, number> = {};
     for (const item of items) {
@@ -151,14 +148,12 @@ export function CampanaNotificaciones() {
     return conteo;
   }, [items]);
 
-  // Filtrar items según bandeja activa
   const itemsFiltrados = useMemo(() => {
     if (filtroActivo === "todas") return items;
     if (filtroActivo === "noLeidas") return items.filter((i) => !i.leido);
     return items.filter((i) => getTipo(i.tipo) === filtroActivo);
   }, [items, filtroActivo]);
 
-  // Construir lista de bandejas (solo mostrar las que tienen items)
   const bandejas: Array<{
     id: TipoNotificacion | "todas" | "noLeidas";
     label: string;

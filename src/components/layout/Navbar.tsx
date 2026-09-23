@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { CampanaNotificaciones } from "@/components/layout/CampanaNotificaciones";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ACTIVO = "text-stone-900 border-b border-stone-900 pb-0.5";
 const INACTIVO = "text-stone-500 hover:text-stone-900 transition-colors";
@@ -103,8 +103,7 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Campana de notificaciones */}
-          <CampanaNotificaciones />
+          {accessToken && <CampanaNotificaciones />}
 
           {accessToken ? (
             <div className="hidden md:flex items-center gap-4">
