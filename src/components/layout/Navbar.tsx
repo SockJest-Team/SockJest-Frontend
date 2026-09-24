@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -23,6 +23,11 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [menuAbierto, setMenuAbierto] = useState(false);
+
+  const [hidratado, setHidratado] = useState(false);
+  useEffect(() => {
+    queueMicrotask(() => setHidratado(true));
+  }, []);
 
   const roles: string[] = user?.roles ?? [];
   const esSubastador = roles.some((r) =>
@@ -67,8 +72,16 @@ export function Navbar() {
   ].filter((l) => l.visible);
 
   const cerrar = () => setMenuAbierto(false);
-  const activo = (l: { href: string; prefijo: boolean }) =>
-    l.prefijo ? pathname.startsWith(l.href) : pathname === l.href;
+
+  const activo = (l: { href: string; prefijo: boolean }) => {
+    if (l.href === "/admin") {
+      return pathname === "/admin";
+    }
+    if (l.href === "/moderacion") {
+      return pathname === "/moderacion" || pathname === "/admin/moderacion";
+    }
+    return l.prefijo ? pathname.startsWith(l.href) : pathname === l.href;
+  };
 
   const queryClient = useQueryClient();
 
@@ -82,6 +95,9 @@ export function Navbar() {
     queryClient.clear();
     router.push("/");
   }
+
+  const mostrarAuth = hidratado && !accessToken;
+  const mostrarUser = hidratado && accessToken;
 
   return (
     <header className="sticky top-0 z-50 bg-[#F9F8F6]/90 backdrop-blur-md border-b border-stone-200">
@@ -103,9 +119,9 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {accessToken && <CampanaNotificaciones />}
+          {mostrarUser && <CampanaNotificaciones />}
 
-          {accessToken ? (
+          {mostrarUser ? (
             <div className="hidden md:flex items-center gap-4">
               <span className="text-xs font-mono uppercase tracking-wider text-stone-600 hidden lg:inline truncate max-w-40">
                 {user?.nombre || user?.email || "Sesión Activa"}
@@ -117,7 +133,7 @@ export function Navbar() {
                 Salir
               </button>
             </div>
-          ) : (
+          ) : mostrarAuth ? (
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/auth?mode=login"
@@ -131,6 +147,11 @@ export function Navbar() {
               >
                 Registrarse
               </Link>
+            </div>
+          ) : (
+            <div className="hidden md:flex items-center gap-3">
+              <div className="h-6 w-16 bg-stone-200 animate-pulse rounded" />
+              <div className="h-9 w-24 bg-stone-200 animate-pulse rounded" />
             </div>
           )}
 
@@ -177,14 +198,14 @@ export function Navbar() {
             </Link>
           ))}
           <div className="pt-3 mt-2 border-t border-stone-100">
-            {accessToken ? (
+            {mostrarUser ? (
               <button
                 onClick={salir}
                 className="w-full py-3 border border-stone-300 font-mono text-[11px] uppercase tracking-widest text-stone-700"
               >
                 Cerrar Sesión
               </button>
-            ) : (
+            ) : mostrarAuth ? (
               <div className="flex gap-3">
                 <Link
                   href="/auth?mode=login"
@@ -201,7 +222,7 @@ export function Navbar() {
                   Registro
                 </Link>
               </div>
-            )}
+            ) : null}
           </div>
         </nav>
       )}
