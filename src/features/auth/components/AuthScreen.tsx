@@ -68,6 +68,7 @@ function AuthForm() {
           correo: form.email,
           contraseña: form.password,
           telefono: form.phone,
+          rol: form.rol as "Comprador" | "Subastador" | "Usuario",
         });
         toast.success("Cuenta creada. Inicia sesión.");
         router.replace("/auth?mode=login", { scroll: false });
