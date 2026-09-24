@@ -33,7 +33,8 @@ axiosClient.interceptors.response.use(
 
     if (
       typeof window !== "undefined" &&
-      window.location.pathname.startsWith("/auth")
+      (window.location.pathname.startsWith("/auth") ||
+        window.location.pathname.startsWith("/suspendido"))
     ) {
       return Promise.reject(error);
     }
@@ -76,10 +77,20 @@ axiosClient.interceptors.response.use(
           original.headers.Authorization = `Bearer ${data.access_token}`;
           return axiosClient(original);
         } catch {
+          const errorData = error.response?.data as
+            | { code?: string }
+            | undefined;
+          const errorCode = errorData?.code;
           useAuthStore.getState().logout();
           if (!redirigiendoALogin) {
             redirigiendoALogin = true;
-            window.location.href = "/auth?mode=login";
+            if (errorCode === "CUENTA_BLOQUEADA") {
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+              window.location.href = "/suspendido";
+            } else {
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+              window.location.href = "/auth?mode=login";
+            }
           }
           return Promise.reject(error);
         }
@@ -91,10 +102,18 @@ axiosClient.interceptors.response.use(
       !esRutaAuth &&
       typeof window !== "undefined"
     ) {
+      const errorData = error.response?.data as { code?: string } | undefined;
+      const errorCode = errorData?.code;
       useAuthStore.getState().logout();
       if (!redirigiendoALogin) {
         redirigiendoALogin = true;
-        window.location.href = "/auth?mode=login";
+        if (errorCode === "CUENTA_BLOQUEADA") {
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+          window.location.href = "/suspendido";
+        } else {
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+          window.location.href = "/auth?mode=login";
+        }
       }
     }
 
