@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -23,11 +23,6 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [menuAbierto, setMenuAbierto] = useState(false);
-
-  const [hidratado, setHidratado] = useState(false);
-  useEffect(() => {
-    queueMicrotask(() => setHidratado(true));
-  }, []);
 
   const roles: string[] = user?.roles ?? [];
   const esSubastador = roles.some((r) =>
@@ -96,9 +91,6 @@ export function Navbar() {
     router.push("/");
   }
 
-  const mostrarAuth = hidratado && !accessToken;
-  const mostrarUser = hidratado && accessToken;
-
   return (
     <header className="sticky top-0 z-50 bg-[#F9F8F6]/90 backdrop-blur-md border-b border-stone-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
@@ -119,9 +111,9 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {mostrarUser && <CampanaNotificaciones />}
+          {accessToken && <CampanaNotificaciones />}
 
-          {mostrarUser ? (
+          {accessToken ? (
             <div className="hidden md:flex items-center gap-4">
               <span className="text-xs font-mono uppercase tracking-wider text-stone-600 hidden lg:inline truncate max-w-40">
                 {user?.nombre || user?.email || "Sesión Activa"}
@@ -133,7 +125,7 @@ export function Navbar() {
                 Salir
               </button>
             </div>
-          ) : mostrarAuth ? (
+          ) : (
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/auth?mode=login"
@@ -147,11 +139,6 @@ export function Navbar() {
               >
                 Registrarse
               </Link>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center gap-3">
-              <div className="h-6 w-16 bg-stone-200 animate-pulse rounded" />
-              <div className="h-9 w-24 bg-stone-200 animate-pulse rounded" />
             </div>
           )}
 
@@ -198,14 +185,14 @@ export function Navbar() {
             </Link>
           ))}
           <div className="pt-3 mt-2 border-t border-stone-100">
-            {mostrarUser ? (
+            {accessToken ? (
               <button
                 onClick={salir}
                 className="w-full py-3 border border-stone-300 font-mono text-[11px] uppercase tracking-widest text-stone-700"
               >
                 Cerrar Sesión
               </button>
-            ) : mostrarAuth ? (
+            ) : (
               <div className="flex gap-3">
                 <Link
                   href="/auth?mode=login"
@@ -222,7 +209,7 @@ export function Navbar() {
                   Registro
                 </Link>
               </div>
-            ) : null}
+            )}
           </div>
         </nav>
       )}
