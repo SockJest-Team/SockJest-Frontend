@@ -1,17 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { useSincronizarPerfil } from "@/features/auth/hooks/useSincronizarPerfil";
+import {
+  LayoutDashboard,
+  Package,
+  Users,
+  CreditCard,
+  History,
+  Flag,
+  ShieldCheck,
+} from "lucide-react";
 
-const SECCIONES = [
-  { href: "/admin", label: "Resumen", icono: "📊" },
-  { href: "/admin/categorias", label: "Categorías", icono: "🗂️" },
-  { href: "/admin/moderacion", label: "Moderación", icono: "🛡️" },
-  { href: "/admin/historial", label: "Historial de estados", icono: "🕓" },
-  { href: "/admin/usuarios", label: "Usuarios", icono: "👥" },
-  { href: "/admin/pagos", label: "Pagos", icono: "💳" },
+const NAV_ITEMS = [
+  { href: "/admin", label: "Resumen", icon: LayoutDashboard, exact: true },
+  { href: "/admin/moderacion", label: "Moderación", icon: ShieldCheck },
+  { href: "/admin/apelaciones", label: "Apelaciones", icon: Flag },
+  { href: "/admin/usuarios", label: "Usuarios", icon: Users },
+  { href: "/admin/categorias", label: "Categorías", icon: Package },
+  { href: "/admin/pagos", label: "Pagos", icon: CreditCard },
+  { href: "/admin/historial", label: "Historial", icon: History },
 ];
 
 export default function AdminLayout({
@@ -21,70 +32,92 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const user = useAuthStore((s) => s.user);
-  const [menuAbierto, setMenuAbierto] = useState(false);
+  const { user } = useAuthStore();
+  const [hidratado, setHidratado] = useState(false);
+
+  useSincronizarPerfil();
 
   useEffect(() => {
-    if (!user) router.replace("/auth?mode=login");
-    else if (!user.roles?.includes("Admin")) router.replace("/");
-  }, [user, router]);
+    const t = setTimeout(() => setHidratado(true), 0);
+    return () => clearTimeout(t);
+  }, []);
 
-  if (!user?.roles?.includes("Admin")) return null;
+  useEffect(() => {
+    if (!hidratado) return;
+    if (!user) {
+      router.replace("/auth?mode=login");
+      return;
+    }
+    const t = setTimeout(() => {
+      if (!user.roles?.includes("Admin")) {
+        router.replace("/");
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [hidratado, user, router]);
+
+  if (!hidratado || !user) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-stone-50">
+        <div className="h-8 w-8 rounded-full border-2 border-stone-300 border-t-stone-900 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user.roles?.includes("Admin")) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-stone-50">
+        <div className="h-8 w-8 rounded-full border-2 border-stone-300 border-t-stone-900 animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F9F8F6] flex flex-col lg:flex-row">
-      <aside className="hidden lg:flex lg:w-64 flex-col bg-stone-900 text-white p-6 gap-2 sticky top-20 h-[calc(100vh-5rem)]">
-        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-stone-400 block mb-6">
-          Panel Admin
-        </span>
-        {SECCIONES.map((s) => (
-          <Link
-            key={s.href}
-            href={s.href}
-            className={`flex items-center gap-3 px-4 py-3 font-mono text-[11px] uppercase tracking-widest transition-colors ${
-              pathname === s.href
-                ? "bg-white text-stone-900"
-                : "text-stone-300 hover:bg-stone-800"
-            }`}
-          >
-            <span>{s.icono}</span> {s.label}
-          </Link>
-        ))}
+    <div className="min-h-screen bg-stone-50 flex">
+      {/* Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-stone-200">
+        <div className="h-16 border-b border-stone-200 flex items-center px-6">
+          <span className="font-mono text-xs uppercase tracking-widest text-stone-900 font-medium">
+            Admin Panel
+          </span>
+        </div>
+        <nav className="flex-1 py-4 space-y-1 px-3">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const active = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  active
+                    ? "bg-stone-900 text-white"
+                    : "text-stone-600 hover:bg-stone-100"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
       </aside>
 
-      <div className="lg:hidden sticky top-20 z-30 bg-stone-900 text-white px-6 py-3 flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.3em]">
-          Panel Admin
-        </span>
-        <button
-          onClick={() => setMenuAbierto((v) => !v)}
-          className="font-mono text-xs uppercase tracking-widest cursor-pointer"
-        >
-          {menuAbierto ? "Cerrar ✕" : "Secciones ☰"}
-        </button>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col">
+        <header className="h-16 bg-white border-b border-stone-200 flex items-center justify-between px-6">
+          <h1 className="text-lg font-serif text-stone-900">Administración</h1>
+          <Link
+            href="/"
+            className="text-xs font-mono uppercase tracking-wider text-stone-500 hover:text-stone-900"
+          >
+            Ver sitio →
+          </Link>
+        </header>
+        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
       </div>
-      {menuAbierto && (
-        <nav className="lg:hidden bg-stone-900 text-white px-6 pb-4 flex flex-col gap-1">
-          {SECCIONES.map((s) => (
-            <Link
-              key={s.href}
-              href={s.href}
-              onClick={() => setMenuAbierto(false)}
-              className={`px-4 py-3 font-mono text-[11px] uppercase tracking-widest ${
-                pathname === s.href
-                  ? "bg-white text-stone-900"
-                  : "text-stone-300"
-              }`}
-            >
-              {s.icono} {s.label}
-            </Link>
-          ))}
-        </nav>
-      )}
-
-      <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-6xl w-full">
-        {children}
-      </main>
     </div>
   );
 }
