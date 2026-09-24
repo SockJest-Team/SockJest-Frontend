@@ -18,6 +18,7 @@ export interface PayloadRegistro {
   correo: string;
   contraseña: string;
   telefono: string;
+  rol: "Comprador" | "Subastador" | "Usuario";
 }
 
 export const authService = {
@@ -32,7 +33,6 @@ export const authService = {
     return data;
   },
 
-  // 🔒 FIX FE-CRIT-02: payload sin `rol`
   register: async (payload: PayloadRegistro) => {
     const { data } = await axiosClient.post("/auth/register", payload);
     return data;
